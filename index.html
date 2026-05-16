@@ -14,7 +14,6 @@
         body {
             margin: 0;
             height: 100vh;
-            /* 優化手機背景圖：加入後備顏色，並限制圖片寬度為 800px 提升載入速度 */
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
                         #0a1118 url('https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800'); 
             background-size: cover;
@@ -25,23 +24,22 @@
             perspective: 1200px;
             overflow: hidden;
             font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
-            padding: 15px; /* 防止手機邊緣貼死 */
+            padding: 15px;
             box-sizing: border-box;
         }
 
-        /* 全息螢幕 - 修改為手機自適應 */
         #hologram-screen {
             width: 100%;
-            max-width: 500px; /* 電腦上最大 500px，手機上自動變小 */
-            min-height: 380px; /* 改為最小高度，讓內容能自適應撐開 */
+            max-width: 500px;
+            min-height: 380px;
             background: rgba(0, 40, 60, 0.25);
             border: 1px solid var(--hologram-cyan);
             border-radius: 20px;
             position: relative;
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px); /* 相容 iPhone Safari */
+            -webkit-backdrop-filter: blur(15px);
             box-shadow: 0 0 30px rgba(0, 255, 242, 0.2);
-            transform: rotateX(3deg) rotateY(-5deg); /* 減小旋轉角度，手機看更清晰 */
+            transform: rotateX(3deg) rotateY(-5deg);
             animation: idle-float 8s ease-in-out infinite;
             padding: 25px 20px;
             color: white;
@@ -54,17 +52,15 @@
             50% { transform: rotateX(5deg) rotateY(-3deg) translateY(-8px); }
         }
 
-        /* 介面細節 */
         .status-bar { font-size: 10px; color: var(--hologram-cyan); margin-bottom: 20px; border-bottom: 1px solid rgba(0,255,242,0.2); padding-bottom: 5px; }
         .score-board { position: absolute; top: 15px; right: 20px; font-size: 12px; }
 
-        /* 詐騙通知彈窗 - 修改手機寬度與位置 */
         #threat-notif {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            width: 88%; /* 手機上滿滿的彈窗體驗 */
+            width: 88%;
             max-width: 340px;
             background: rgba(15, 15, 20, 0.98);
             border: 1px solid var(--hologram-cyan);
@@ -81,14 +77,14 @@
             background: transparent;
             border: 1px solid var(--hologram-cyan);
             color: white;
-            padding: 14px 10px; /* 加大手指點擊區域 */
+            padding: 14px 10px;
             width: 100%;
             margin-top: 10px;
             cursor: pointer;
             transition: 0.3s;
-            font-size: 14px; /* 適合手機的字體大小 */
+            font-size: 14px;
             border-radius: 8px;
-            -webkit-tap-highlight-color: transparent; /* 拔除手機點擊藍色陰影 */
+            -webkit-tap-highlight-color: transparent;
         }
         .btn:hover, .btn:active { background: var(--hologram-cyan); color: #000; }
         .btn-danger { border-color: var(--danger-red); color: var(--danger-red); }
@@ -100,13 +96,13 @@
 <body>
 
 <div id="hologram-screen">
-    <div class="status-bar">USER_PROFILE: RELAXED_MODE // ENCRYPTION: LOW</div>
+    <div class="status-bar">USER_PROFILE: SECURITY_MODE // ENCRYPTION: HIGH</div>
     <div class="score-board">防禦得分: <span id="score">0</span></div>
     
     <div id="app-content">
-        <h3 id="app-title">正在載入防禦系統...</h3>
+        <h3 id="app-title">數位防詐高手挑戰賽</h3>
         <p id="app-desc" style="font-size: 14px; opacity: 0.7;">
-            請稍候，正在讀取最新的防詐騙核心資料庫...
+            情境模擬中，請注意彈出的視窗訊息。
         </p>
     </div>
 
@@ -127,72 +123,24 @@
 </div>
 
 <script>
-    let score = 0;
-    let currentIdx = 0;
-    let questions = [];
-
-    // 初始化網頁，讀取外部分離的 JSON 資料
-    async function initGame() {
-        try {
-            // 讀取與 HTML 放在同個資料夾底下的 question.json
-            const response = await fetch('question.json');
-            if (!response.ok) {
-                throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
-            }
-            const data = await response.json();
-            
-            // 解析你的新 JSON 結構：抓取物件裡面的 questions 陣列
-            questions = data.questions;
-            
-            // 同步將網頁的標題換成你定義的標題
-            if (data.quiz_title) {
-                document.title = data.quiz_title;
-            }
-            
-            // 資料載入成功後，開始跑第一題
-            loadQuestion();
-        } catch (error) {
-            console.error("無法載入題目資料 (JSON):", error);
-            document.getElementById('app-title').innerText = "連線錯誤";
-            document.getElementById('app-desc').innerText = "無法載入防禦題目，請確認 json 檔案內容、檔名或 GitHub 部署狀態。";
-        }
-    }
-
-    function loadQuestion() {
-        if (questions.length === 0) return;
-
-        const q = questions[currentIdx];
-        
-        // 頂部狀態欄顯示分類與進度（例如：【網購與物流】 第 1 / 30 題）
-        document.getElementById('app-title').innerText = `【${q.category}】 第 ${currentIdx + 1} / ${questions.length} 題`;
-        
-        // 中央顯示題目情境
-        document.getElementById('app-desc').innerText = "情境模擬中，請注意彈出的視窗訊息。";
-        
-        // 彈出視窗顯示詳細敘述
-        document.getElementById('threat-body').innerText = q.question;
-        
-        // 帶入你的 options 選項文字
-        document.getElementById('btn-1').innerText = q.options[0];
-        document.getElementById('btn-2').innerText = q.options[1];
-        
-        // 重新綁定點擊事件（選項一對應索引 0，選項二對應索引 1）
-        document.getElementById('btn-1').onclick = () => checkAns(0);
-        document.getElementById('btn-2').onclick = () => checkAns(1);
-
-        // 重置元件狀態
-        document.getElementById('feedback').style.display = 'none';
-        document.getElementById('action-btns').style.display = 'block';
-        
-        // 動態滑入彈窗
-        setTimeout(() => {
-            document.getElementById('threat-notif').classList.add('active');
-        }, 800);
-    }
-
-    function checkAns(choiceIdx) {
-        const q = questions[currentIdx];
-        const feedbackText = document.getElementById('feedback-text');
-        
-        document.getElementById('feedback').style.display = 'block';
-        document
+    // 內嵌寫死的 30 題完整題庫
+    const allQuestions = [
+        { "category": "網購與物流", "question": "收到簡訊：『您的包裹配送地址不全，請點擊連結 (bit.ly/post-service) 重新輸入資料並付 20 元手續費』。", "options": ["點連結補齊資料並刷卡", "不點連結，去官網或下載官方 APP 查狀態"], "answer": 1, "explanation": "物流公司不會用簡訊要求你「輸入信用卡號」來更改地址，這是常見的釣魚手段。" },
+        { "category": "網購與物流", "question": "收到簡訊：『您訂購的商品已抵達 7-11 門市，請於三日內憑證件取貨』。簡訊內沒有任何網址連結。", "options": ["這是詐騙，絕對不去取貨", "確認自己有無購物，再去取貨"], "answer": 1, "explanation": "不帶連結、僅通知取貨的簡訊通常是正常的。但領取前仍要確認是否為自己訂購的商品，避免「幽靈包裹」。" },
+        { "category": "網購與物流", "question": "在臉書看到：『百貨公司結束營業，原價三萬元的相機現在只要 1500 元』，強調貨到付款，限時搶購。", "options": ["價格太便宜了，趕快下單", "這是典型的一頁式廣告詐騙，不予理會"], "answer": 1, "explanation": "低於市價過多的商品極具風險，一頁式廣告常缺乏聯絡資訊，貨到付款也可能拿到垃圾。" },
+        { "category": "網購與物流", "question": "接到自稱電商客服電話：『抱歉系統出錯，將您設為批發商會重複扣款 12 次，請去 ATM 操作取消。』", "options": ["立刻去 ATM 照指示操作", "掛斷電話，ATM 只有轉帳功能沒有解除設定功能"], "answer": 1, "explanation": "這是經典的「解除分期付款」詐騙，ATM 完全沒有解除設定或驗證身分的功能。" },
+        { "category": "網購與物流", "question": "網購官網發出推播通知：『本期會員紅利即將到期，請登入官網兌換』，網址為該公司的官方網域。", "options": ["自行開啟官網確認紅利資訊", "覺得只要是網址都是騙人的"], "answer": 0, "explanation": "官方網域的通知通常是安全的，但保險起見建議「自行開啟官方網頁」而非直接點選來源不明的連結。" },
+        { "category": "網購與物流", "question": "賣家私訊你：『為了幫您省平台手續費，我們加 LINE 私下匯款，我再給你 9 折優惠。』", "options": ["答應私下交易省錢", "拒絕，只透過平台保障交易安全"], "answer": 1, "explanation": "私下交易會失去平台保障，一旦匯款後賣家消失，你將求助無門。" },
+        { "category": "通訊與社群", "question": "好友在 LINE 傳訊息：『我手機壞了，可以幫我收個簡訊認證碼並傳給我嗎？』", "options": ["打電話給本人確認", "立刻幫他收並告知驗證碼"], "answer": 0, "explanation": "驗證碼就是帳號的鑰匙，一旦給出，你的帳號就會被盜走。" },
+        { "category": "通訊與社群", "question": "長輩在 LINE 群組傳送一張長輩圖，寫著：『天氣轉涼，記得多穿衣服。』", "options": ["覺得是詐騙連結，立刻舉報", "這是正常的問候，回個貼圖即可"], "answer": 1, "explanation": "單純的圖片或文字問候是社交常態，不涉及個資或金錢通常是安全的。" },
+        { "category": "通訊與社群", "question": "收到陌生人的 LINE 好友邀請，大頭貼是美女/帥哥，寫著：『我是某某證券助理，有飆股分享。』", "options": ["加入看看有沒有賺錢機會", "直接封鎖並檢舉"], "answer": 1, "explanation": "這是典型的投資詐騙開頭，專門誘導民眾加入詐騙群組進行假投資。" },
+        { "category": "通訊與社群", "question": "剛認識三天的交友對象說：『我最近在玩這款投資 App，每天賺三千，你要不要跟著我操作？』", "options": ["為了增進感情，投一點點試試", "這是「殺豬盤」詐騙，拒絕參與"], "answer": 1, "explanation": "先建立情感信任再誘導投資是典型詐騙，千萬不要在不明平台投入資金。" },
+        { "category": "通訊與社群", "question": "好友在 FB 發文：『這間拉麵店超好吃的，給你參考 (Google Maps 網址)』。", "options": ["確認網域為 Google 官方網域後可點看評價", "只要是網址一律不點"], "answer": 0, "explanation": "識別知名且正確的官方網域（如 Google Maps）是防詐的基礎，不需要過度恐慌。" },
+        { "category": "通訊與社群", "question": "收到簡訊：『您的 LINE 帳號異常，請點此連結 (line-login.me) 重新驗證，否則將停權。』", "options": ["點進去趕快輸入帳密驗證", "不點連結，這是釣魚網站"], "answer": 1, "explanation": "官方不會透過簡訊要求你在非官方網域輸入密碼，這是在盜取你的登入權限。" },
+        { "category": "金融投資", "question": "接到自稱銀行客服：『您的信用卡在國外被盜刷，請提供卡號後三碼與手機簡訊碼供核對。』", "options": ["為了止付，趕快告訴對方", "掛斷電話，自行撥打信用卡背面的銀行電話"], "answer": 1, "explanation": "銀行客服不會主動要求你告知「簡訊驗證碼」或「卡號後三碼」，那是交易的最後關鍵資料。" },
+        { "category": "金融投資", "question": "銀行 App 跳出推播訊息：『本月信用卡帳單已出帳，應繳總金額為 5,000 元，請按時繳納。』", "options": ["這是詐騙，絕對不繳錢", "進入 App 確認帳單明細並繳款"], "answer": 1, "explanation": "透過官方 App 推播的繳款提醒是正常流程，只要不隨意點擊外部傳來的奇怪連結即可。" },
+        { "category": "金融投資", "question": "YouTube 廣告宣稱：『我是某知名理財導師，保證獲利 20%，零風險，現在加入領取密碼袋。』", "options": ["保證獲利太吸引人了，加入看看", "保證獲利、零風險就是詐騙的關鍵字"], "answer": 1, "explanation": "投資一定有風險，任何宣稱「保證獲利」且「零風險」的資訊 100% 是詐騙。" },
+        { "category": "金融投資", "question": "收到郵件：『您的銀行帳戶暫時凍結，請點此連結輸入身分證字號解鎖。』網址看起來像官網但尾碼不對。", "options": ["趕快點進去解鎖", "不要點擊，這是釣魚郵件"], "answer": 1, "explanation": "銀行不會透過郵件連結要求輸入身分證字號等高度敏感資訊。" },
+        { "category": "金融投資", "question": "接到銀行電話：『您好，本行目前有提供優質客戶低利貸款，有需要參考看看嗎？』過程中無求個資。", "options": ["拒絕並掛斷，這也是詐騙", "若有需求可聽聽看，或去實體分行詢問"], "answer": 1, "explanation": "銀行電話行銷是常見業務，只要不透過電話提供個資或密碼，通常是單純的推廣。" },
+        { "category": "金融投資", "question": "收到簡訊：『恭喜獲得紓困貸款額度 50 萬，利率只要 0.1%，點擊連結由專員為您服務。』", "options": ["點連結申請，利率很划算", "這是假貸款詐騙，旨在騙取手續費或個人帳戶"], "answer": 1, "explanation": "非官方管道的「高額低利」貸款廣告，通常是為了騙取你的個資或存款帳戶。" },
+        { "category": "假冒機構", "question": "接到自稱檢察官電話：『你涉及洗錢，請將現金交給自稱法務部派來的專員進行監管。』", "options": ["配合監管以證明清白", "直接掛斷，警察不會在電話中要求交錢"], "answer": 1, "explanation": "政府機關絕對不會要求民眾「交付現金」或「監管帳戶」，這是
